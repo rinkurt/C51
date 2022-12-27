@@ -1,0 +1,137 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/12/2022 22:08:27 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main.ls
+                    -t) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Delay.h"
+   3          #include "Timer0.h"
+   4          
+   5          //蜂鸣器端口定义
+   6          sbit Buzzer=P2^5;
+   7          
+   8          //播放速度，值为四分音符的时长(ms)
+   9          #define SPEED   500
+  10          
+  11          //音符与索引对应表，P：休止符，L：低音，M：中音，H：高音，下划线：升半音�
+             -��号#
+  12          #define P       0
+  13          #define L1      1
+  14          #define L1_     2
+  15          #define L2      3
+  16          #define L2_     4
+  17          #define L3      5
+  18          #define L4      6
+  19          #define L4_     7
+  20          #define L5      8
+  21          #define L5_     9
+  22          #define L6      10
+  23          #define L6_     11
+  24          #define L7      12
+  25          #define M1      13
+  26          #define M1_     14
+  27          #define M2      15
+  28          #define M2_     16
+  29          #define M3      17
+  30          #define M4      18
+  31          #define M4_     19
+  32          #define M5      20
+  33          #define M5_     21
+  34          #define M6      22
+  35          #define M6_     23
+  36          #define M7      24
+  37          #define H1      25
+  38          #define H1_     26
+  39          #define H2      27
+  40          #define H2_     28
+  41          #define H3      29
+  42          #define H4      30
+  43          #define H4_     31
+  44          #define H5      32
+  45          #define H5_     33
+  46          #define H6      34
+  47          #define H6_     35
+  48          #define H7      36
+  49          
+  50          //索引与频率对照表
+  51          unsigned int FreqTable[]={
+  52                  0,
+  53                  63628,63731,63835,63928,64021,64103,64185,64260,64331,64400,64463,64528,
+C51 COMPILER V9.60.0.0   MAIN                                                              12/12/2022 22:08:27 PAGE 2   
+
+  54                  64580,64633,64684,64732,64777,64820,64860,64898,64934,64968,65000,65030,
+  55                  65058,65085,65110,65134,65157,65178,65198,65217,65235,65252,65268,65283,
+  56          };
+  57          
+  58          //乐谱
+  59          unsigned char code Music[]={
+  60                  //音符,时值,
+  61                  
+  62                  P, 8,
+  63                  
+  64                  L6, 2, L7, 2, M1, 2, M2, 2, M3, 4, 
+  65                  M6, 2, M5, 2, M3, 4, L6, 4, M3, 2, M2, 2, M1, 2, L7, 2,
+  66                  L6, 2, L7, 2, M1, 2, M2, 2, M3, 4, 
+  67                  M2, 2, M1, 2, L7, 2, L6, 2, L7, 2, M1, 2, L7,2, L6,2, L5_,2, L7,2,
+  68                  
+  69                  P,      4,
+  70                  
+  71                  0xFF    //终止标志
+  72          };
+  73          
+  74          unsigned char FreqSelect,MusicSelect;
+  75          
+  76          void main()
+  77          {
+  78   1              Timer0Init();
+  79   1              while(1)
+  80   1              {
+  81   2                      if(Music[MusicSelect]!=0xFF)    //如果不是停止标志位
+  82   2                      {
+  83   3                              FreqSelect=Music[MusicSelect];  //选择音符对应的频率
+  84   3                              MusicSelect++;
+  85   3                              Delay(SPEED/4*Music[MusicSelect]);      //选择音符对应的时值
+  86   3                              MusicSelect++;
+  87   3                              TR0=0;
+  88   3                              Delay(5);       //音符间短暂停顿
+  89   3                              TR0=1;
+  90   3                      }
+  91   2                      else    //如果是停止标志位
+  92   2                      {
+  93   3                              TR0=0;
+  94   3                              while(1);
+  95   3                      }
+  96   2              }
+  97   1      }
+  98          
+  99          void Timer0_Routine() interrupt 1
+ 100          {
+ 101   1              if(FreqTable[FreqSelect])       //如果不是休止符
+ 102   1              {
+ 103   2                      /*取对应频率值的重装载值到定时器*/
+ 104   2                      TL0 = FreqTable[FreqSelect]%256;                //设置定时初值
+ 105   2                      TH0 = FreqTable[FreqSelect]/256;                //设置定时初值
+ 106   2                      Buzzer=!Buzzer; //翻转蜂鸣器IO口
+ 107   2              }
+ 108   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    101    ----
+   CONSTANT SIZE    =     61    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              12/12/2022 22:08:27 PAGE 3   
+
+   DATA SIZE        =     76    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
